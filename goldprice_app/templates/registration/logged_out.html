@@ -1,0 +1,11 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Logged Out{% endblock %}
+
+{% block content %}
+<div class="container">  
+    <h2>You have been logged out.</h2>
+    <p>Thank you for using the Gold Price Checker!</p>
+    <a class="btn btn-primary" href="{% url 'login' %}">Log in again</a> 
+</div>
+{% endblock %}

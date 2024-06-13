@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Price Checker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            display: none;
+        }
+        .result h3 {
+            margin-top: 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        
+    </style>
+</head>
+<body>
+   
+    <div class="container">
+        <h1>Welcome to the Homepage!</h1>
+        <!-- Button to navigate to the registration page -->
+        <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+        <!-- Add more homepage content here -->
+    </div>
+
+
+     <div class="container">
+        <h1>Gold Price Checker</h1>
+        {% if user.is_authenticated %}
+            <div class="form-group">
+                <label for="cityInput">Enter City:</label>
+                <input type="text" id="cityInput" placeholder="City name" onkeypress="checkEnter(event)">
+            </div>
+            <button id="getGoldPriceButton">Get Gold Price</button>
+            <div id="result" class="result">
+                <h3>Gold Prices</h3>
+                <p><strong>City:</strong> <span id="result-city"></span></p>
+                <p><strong>10g 22K:</strong> <span id="result-22k"></span></p>
+                <p><strong>10g 24K:</strong> <span id="result-24k"></span></p>
+            </div>
+        {% else %}
+            <p>Please <a href="{% url 'login' %}">login</a> to check gold prices.</p>
+        {% endif %}
+    </div> 
+
+    <script>
+        document.querySelector('#cityInput').addEventListener('keyup', checkEnter);
+    
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                document.querySelector('#getGoldPriceButton').click();
+            }
+        }
+    
+        document.querySelector('#getGoldPriceButton').addEventListener('click', function() {
+            var city = document.querySelector('#cityInput').value.trim().toLowerCase();
+    
+            if (city === "") {
+                alert("Please enter a city name.");
+                return;
+            }
+    
+            fetch('/prices/?city=' + encodeURIComponent(city))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var resultDiv = document.getElementById('result');
+                    var resultCity = document.getElementById('result-city');
+                    var result22k = document.getElementById('result-22k');
+                    var result24k = document.getElementById('result-24k');
+    
+                    if (data.error) {
+                        resultDiv.style.display = 'none'; // Hide if there's an error
+                        alert(data.error);
+                    } else {
+                        resultCity.textContent = data.city;
+                        result22k.textContent = '₹' + data.TenGram22K; 
+                        result24k.textContent = '₹' + data.TenGram24K; 
+                        resultDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    // Optionally, display a user-friendly error message on the page
+                });
+        });
+    </script>
+   
+</body>
+</html>
